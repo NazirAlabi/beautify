@@ -23,7 +23,7 @@ export const BottomNav = () => {
           >
             {/* Gradient active indicator bar */}
             {isActive && (
-              <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-6 h-1 bg-gradient-to-r from-primary to-accent-coral rounded-full" />
+              <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-6 h-1 bg-linear-to-r from-primary to-accent-coral rounded-full" />
             )}
             <Icon
               size={22}

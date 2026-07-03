@@ -30,7 +30,7 @@ export const GlassCard = ({
     <div className={`${base} ${hoverCls} relative overflow-hidden ${className}`} {...props}>
       {accent && (
         <div
-          className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${accentColors[accent] || accentColors.primary} rounded-l-2xl`}
+          className={`absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b ${accentColors[accent] || accentColors.primary} rounded-l-2xl`}
         />
       )}
       {children}

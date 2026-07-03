@@ -35,7 +35,7 @@ const FilterPills = ({ filter, setFilter }) => {
 };
 
 const TransactionRow = ({ transaction: t }) => (
-  <tr className="hover:bg-[var(--surface-hover)] transition-colors group">
+  <tr className="hover:bg-(--surface-hover) transition-colors group">
     <td className="px-5 py-4 whitespace-nowrap font-medium text-foreground text-sm">
       {new Date(t.date).toLocaleDateString(undefined, {
         month: 'short', day: 'numeric', year: 'numeric',

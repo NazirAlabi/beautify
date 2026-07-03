@@ -167,7 +167,7 @@ export const NewIncome = () => {
       <PageHeader title="Record Income" subtitle="Add a new earning" />
 
       <GlassCard className="overflow-hidden">
-        <div className="h-1 bg-gradient-to-r from-primary via-accent-coral to-accent-gold" />
+        <div className="h-1 bg-linear-to-r from-primary via-accent-coral to-accent-gold" />
 
         <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -199,7 +199,7 @@ export const NewIncome = () => {
                   {selectedServices.map(srv => (
                     <div
                       key={srv.id}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-primary/10 to-accent-coral/10 border border-primary/20 text-xs font-semibold text-foreground shadow-sm animate-scale-in"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-linear-to-r from-primary/10 to-accent-coral/10 border border-primary/20 text-xs font-semibold text-foreground shadow-sm animate-scale-in"
                     >
                       <span>{srv.name} (₵{srv.price})</span>
                       <button

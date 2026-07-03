@@ -46,7 +46,7 @@ export const NewExpense = () => {
       />
 
       <GlassCard className="overflow-hidden">
-        <div className="h-1 bg-gradient-to-r from-destructive via-orange-400 to-accent-coral" />
+        <div className="h-1 bg-linear-to-r from-destructive via-orange-400 to-accent-coral" />
 
         <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

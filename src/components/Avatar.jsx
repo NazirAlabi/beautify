@@ -35,7 +35,7 @@ export const Avatar = ({ name = '', size = 'md', className = '' }) => {
 
   return (
     <div
-      className={`bg-gradient-to-br ${gradient} rounded-full flex items-center justify-center text-white font-bold shadow-md ${sizes[size]} ${className}`}
+      className={`bg-linear-to-br ${gradient} rounded-full flex items-center justify-center text-white font-bold shadow-md ${sizes[size]} ${className}`}
     >
       {initials || '?'}
     </div>

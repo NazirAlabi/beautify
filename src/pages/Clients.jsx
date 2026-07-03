@@ -11,7 +11,7 @@ import { Button } from '../components/Button';
 const ClientCard = ({ client, stats }) => (
   <GlassCard hover className="p-6 flex flex-col justify-between group">
     {/* Subtle glass shimmer on hover */}
-    <div className="absolute top-0 right-0 w-24 h-full bg-gradient-to-b from-white/30 to-transparent dark:from-white/5 opacity-0 group-hover:opacity-100 transition-opacity transform skew-x-12 translate-x-10 group-hover:translate-x-0 duration-700 pointer-events-none" />
+    <div className="absolute top-0 right-0 w-24 h-full bg-linear-to-b from-white/30 to-transparent dark:from-white/5 opacity-0 group-hover:opacity-100 transition-opacity transform skew-x-12 translate-x-10 group-hover:translate-x-0 duration-700 pointer-events-none" />
 
     <div className="flex items-start gap-4">
       <Avatar name={client.name} size="lg" />

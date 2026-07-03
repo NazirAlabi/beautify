@@ -21,7 +21,7 @@ const ProgressBar = ({ label, value, total, delay = 0 }) => {
       </div>
       <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-primary to-accent-coral progress-fill"
+          className="h-full rounded-full bg-linear-to-r from-primary to-accent-coral progress-fill"
           style={{ width: `${pct}%`, animationDelay: `${delay + 200}ms` }}
         />
       </div>
@@ -30,7 +30,7 @@ const ProgressBar = ({ label, value, total, delay = 0 }) => {
 };
 
 const HighlightRow = ({ icon: Icon, label, value }) => (
-  <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface-subtle)] border border-border/30">
+  <div className="flex items-center justify-between p-4 rounded-xl bg-(--surface-subtle) border border-border/30">
     <div className="flex items-center gap-3">
       <div className="p-2 rounded-lg bg-primary-light text-primary">
         <Icon size={16} />

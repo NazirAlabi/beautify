@@ -12,7 +12,7 @@ export const EmptyState = ({
 }) => (
   <div className={`flex flex-col items-center justify-center text-center py-12 sm:py-16 px-6 ${className}`}>
     {icon && (
-      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-primary-light to-secondary flex items-center justify-center mb-5 shadow-sm">
+      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-linear-to-br from-primary-light to-secondary flex items-center justify-center mb-5 shadow-sm">
         {typeof icon === 'string' ? (
           <span className="text-3xl sm:text-4xl">{icon}</span>
         ) : (
