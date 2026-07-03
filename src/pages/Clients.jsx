@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useData } from '../context/DataContext';
 import { Search, UserPlus, Edit3, Trash2, X, Plus } from 'lucide-react';
 
@@ -219,7 +220,7 @@ export const Clients = () => {
             >
               <button 
                 type="button" 
-                className={`absolute left-0 z-10 h-11 w-11 flex items-center justify-center text-muted-foreground transition-colors ${isSearchFocused || search ? 'pointer-events-none' : 'hover:text-foreground cursor-pointer'}`}
+                className={`p-2.5 mr-0.5 text-muted-foreground hover:text-foreground transition-all duration-300 absolute left-0 z-10 h-11 w-11 flex items-center justify-center ${isSearchFocused || search ? 'pointer-events-none' : 'hover:text-foreground cursor-pointer glass-panel'}`}
                 onClick={() => setIsSearchFocused(true)}
               >
                 <Search size={18} />
@@ -283,8 +284,8 @@ export const Clients = () => {
       )}
 
       {/* Glass Dialog Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm overflow-y-auto animate-fade-in">
+      {isModalOpen && createPortal(
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm overflow-y-auto animate-fade-in">
           <div className="flex min-h-full items-center justify-center p-4">
             <GlassCard className="w-full max-w-md p-6 relative overflow-hidden animate-scale-in my-8" variant="heavy">
               <div className="h-1 absolute top-0 left-0 right-0 bg-linear-to-r from-primary to-accent-coral" />
@@ -397,7 +398,8 @@ export const Clients = () => {
             </form>
           </GlassCard>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
