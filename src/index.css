@@ -1,0 +1,265 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── Adaptive Color Variables ─────────────── */
+
+:root {
+  --bg: hsl(30, 25%, 97%);
+  --fg: hsl(220, 25%, 12%);
+  --primary-h: 340 65% 58%;
+  --primary-fg: #fff;
+  --primary-light: hsl(340, 60%, 94%);
+  --secondary-h: 260 35% 93%;
+  --secondary-fg: hsl(260, 40%, 35%);
+  --muted-h: 220 15% 94%;
+  --muted-fg: hsl(220, 12%, 50%);
+  --border-c: hsl(220, 15%, 88%);
+  --input-border-c: hsl(220, 15%, 85%);
+  --success-h: 152 55% 42%;
+  --success-light: hsl(152, 55%, 94%);
+  --warning-h: 38 92% 50%;
+  --warning-light: hsl(38, 92%, 94%);
+  --destructive-h: 350 75% 52%;
+  --destructive-light: hsl(350, 75%, 95%);
+  --info-h: 215 80% 56%;
+  --info-light: hsl(215, 80%, 94%);
+  /* Glass surfaces */
+  --glass-bg: linear-gradient(135deg, rgba(255,255,255,0.78), rgba(255,255,255,0.55));
+  --glass-border: rgba(255,255,255,0.7);
+  --glass-shadow: 0 4px 24px -4px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.9);
+  --glass-heavy-bg: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,255,255,0.86));
+  --glass-heavy-border: rgba(255,255,255,0.85);
+  --glass-heavy-shadow: 0 8px 32px -8px rgba(0,0,0,0.09), 0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.95);
+  --input-bg: rgba(255,255,255,0.7);
+  --input-focus-bg: #fff;
+  --input-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+  --input-focus-ring: 0 0 0 3px hsla(340, 65%, 58%, 0.12), inset 0 1px 2px rgba(0,0,0,0.02);
+  --surface-hover: rgba(255,255,255,0.5);
+  --surface-subtle: rgba(255,255,255,0.4);
+}
+
+.dark {
+  --bg: hsl(228, 25%, 7%);
+  --fg: hsl(210, 20%, 93%);
+  --primary-h: 340 70% 62%;
+  --primary-light: hsl(340, 40%, 16%);
+  --secondary-h: 260 25% 16%;
+  --secondary-fg: hsl(260, 30%, 75%);
+  --muted-h: 225 20% 14%;
+  --muted-fg: hsl(220, 15%, 52%);
+  --border-c: hsl(225, 18%, 18%);
+  --input-border-c: hsl(225, 15%, 22%);
+  --success-light: hsl(152, 40%, 14%);
+  --warning-light: hsl(38, 50%, 14%);
+  --destructive-light: hsl(350, 45%, 14%);
+  --info-light: hsl(215, 50%, 14%);
+  /* Glass surfaces */
+  --glass-bg: linear-gradient(135deg, rgba(25, 28, 48, 0.72), rgba(18, 20, 38, 0.52));
+  --glass-border: rgba(255,255,255,0.07);
+  --glass-shadow: 0 4px 24px -4px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+  --glass-heavy-bg: linear-gradient(180deg, rgba(22, 25, 42, 0.92), rgba(16, 18, 32, 0.86));
+  --glass-heavy-border: rgba(255,255,255,0.06);
+  --glass-heavy-shadow: 0 8px 32px -8px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
+  --input-bg: rgba(18, 20, 35, 0.6);
+  --input-focus-bg: rgba(22, 25, 42, 0.8);
+  --input-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+  --input-focus-ring: 0 0 0 3px hsla(340, 70%, 62%, 0.15), inset 0 1px 2px rgba(0,0,0,0.1);
+  --surface-hover: rgba(255,255,255,0.06);
+  --surface-subtle: rgba(255,255,255,0.04);
+}
+
+/* ─── Theme Tokens ─────────────────────────── */
+
+@theme {
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+
+  --color-primary: hsl(var(--primary-h));
+  --color-primary-foreground: var(--primary-fg);
+  --color-primary-light: var(--primary-light);
+
+  --color-secondary: hsl(var(--secondary-h));
+  --color-secondary-foreground: var(--secondary-fg);
+
+  --color-accent-gold: hsl(42, 95%, 55%);
+  --color-accent-coral: hsl(12, 85%, 65%);
+  --color-accent-lavender: hsl(260, 55%, 72%);
+
+  --color-muted: hsl(var(--muted-h));
+  --color-muted-foreground: var(--muted-fg);
+
+  --color-border: var(--border-c);
+  --color-input-border: var(--input-border-c);
+
+  --color-success: hsl(var(--success-h));
+  --color-success-light: var(--success-light);
+  --color-warning: hsl(var(--warning-h));
+  --color-warning-light: var(--warning-light);
+  --color-destructive: hsl(var(--destructive-h));
+  --color-destructive-light: var(--destructive-light);
+  --color-info: hsl(var(--info-h));
+  --color-info-light: var(--info-light);
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Dancing Script", cursive;
+
+  --animate-fade-in-up: fade-in-up 0.5s ease-out both;
+  --animate-fade-in: fade-in 0.4s ease-out both;
+  --animate-slide-up: slide-up 0.3s ease-out both;
+  --animate-scale-in: scale-in 0.3s ease-out both;
+}
+
+/* ─── Keyframes ────────────────────────────── */
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes gradient-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%      { transform: translate(30px, -20px) scale(1.05); }
+  50%      { transform: translate(-20px, 20px) scale(0.95); }
+  75%      { transform: translate(10px, 10px) scale(1.02); }
+}
+@keyframes progress-fill {
+  from { width: 0%; }
+}
+
+/* ─── Base ─────────────────────────────────── */
+
+@layer base {
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection {
+    background: hsla(340, 65%, 58%, 0.15);
+  }
+}
+
+/* ─── Component Classes ────────────────────── */
+
+@layer components {
+  .glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.25rem;
+    box-shadow: var(--glass-shadow);
+  }
+  .glass-panel-heavy {
+    background: var(--glass-heavy-bg);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 1px solid var(--glass-heavy-border);
+    border-radius: 1.25rem;
+    box-shadow: var(--glass-heavy-shadow);
+  }
+
+  /* Inputs */
+  .glass-input {
+    @apply w-full rounded-xl px-4 py-3 text-sm transition-all duration-200 focus-visible:outline-none;
+    background: var(--input-bg);
+    border: 1.5px solid var(--input-border-c);
+    box-shadow: var(--input-shadow);
+    color: var(--fg);
+  }
+  .glass-input:focus {
+    background: var(--input-focus-bg);
+    border-color: hsl(var(--primary-h));
+    box-shadow: var(--input-focus-ring);
+  }
+  .glass-input::placeholder {
+    color: var(--muted-fg);
+    opacity: 0.6;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply font-semibold text-white rounded-xl px-6 py-3 flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer;
+    background: linear-gradient(135deg, hsl(var(--primary-h)), hsl(340, 72%, 48%));
+    box-shadow: 0 4px 15px -2px rgba(210, 80, 110, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -2px rgba(210, 80, 110, 0.4);
+    filter: brightness(1.06);
+  }
+  .btn-primary:active { transform: scale(0.97); }
+
+  .btn-secondary {
+    @apply font-semibold rounded-xl px-6 py-3 flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border-c);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    color: var(--fg);
+  }
+  .btn-secondary:hover {
+    background: var(--input-focus-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  }
+  .btn-secondary:active { transform: scale(0.97); }
+
+  .btn-destructive {
+    @apply font-semibold text-white rounded-xl px-6 py-3 flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer;
+    background: linear-gradient(135deg, hsl(var(--destructive-h)), hsl(350, 80%, 44%));
+    box-shadow: 0 4px 15px -2px rgba(220, 55, 65, 0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+  .btn-destructive:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -2px rgba(220, 55, 65, 0.4);
+    filter: brightness(1.06);
+  }
+  .btn-destructive:active { transform: scale(0.97); }
+
+  /* Hover lift for cards */
+  .card-hover { @apply transition-all duration-300; }
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 16px 48px -12px rgba(0,0,0,0.12),
+      0 4px 12px rgba(0,0,0,0.05),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  /* Background gradient blobs */
+  .bg-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    animation: gradient-drift 20s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  /* Surface helpers */
+  .surface-hover {
+    background: var(--surface-hover);
+  }
+  .surface-subtle {
+    background: var(--surface-subtle);
+  }
+
+  /* Animated progress bar fill */
+  .progress-fill {
+    animation: progress-fill 1s ease-out both;
+  }
+}
