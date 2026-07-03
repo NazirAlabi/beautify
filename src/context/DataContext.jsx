@@ -39,7 +39,23 @@ export const DataProvider = ({ children }) => {
         ]);
 
         setTransactions(txs);
-        setClients(cls);
+        
+        // Normalize any legacy/flat client objects to match the new socialMedia schema structure
+        const normalizedClients = cls.map(c => {
+          if (c.instagram && (!c.socialMedia || !c.socialMedia.instagram)) {
+            return {
+              ...c,
+              socialMedia: {
+                snapchat: c.socialMedia?.snapchat || '',
+                instagram: c.instagram,
+                tiktok: c.socialMedia?.tiktok || '',
+                whatsapp: c.socialMedia?.whatsapp || '',
+              }
+            };
+          }
+          return c;
+        });
+        setClients(normalizedClients);
 
         // Auto-seed empty list states for a smoother first-run experience
         if (srvs.length === 0) {
@@ -81,7 +97,12 @@ export const DataProvider = ({ children }) => {
           clientObj = await api.addClient({
             name: transaction.newClient.name,
             phone: transaction.newClient.phone || '',
-            instagram: transaction.newClient.instagram || '',
+            socialMedia: {
+              instagram: transaction.newClient.instagram || '',
+              snapchat: '',
+              tiktok: '',
+              whatsapp: '',
+            },
             notes: transaction.newClient.notes || '',
           });
           setClients(prev => [clientObj, ...prev]);
@@ -93,7 +114,12 @@ export const DataProvider = ({ children }) => {
         clientObj = await api.addClient({
           name: transaction.clientName,
           phone: '',
-          instagram: '',
+          socialMedia: {
+            instagram: '',
+            snapchat: '',
+            tiktok: '',
+            whatsapp: '',
+          },
           notes: ''
         });
         setClients(prev => [clientObj, ...prev]);

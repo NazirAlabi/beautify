@@ -1,6 +1,6 @@
 import React from 'react';
 import { useData } from '../context/DataContext';
-import { TrendingUp, TrendingDown, DollarSign, Award, Percent, Download } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Award, Percent, Download, Calendar, Users } from 'lucide-react';
 
 import { PageHeader } from '../components/PageHeader';
 import { StatCard } from '../components/StatCard';
@@ -57,6 +57,24 @@ export const Reports = () => {
   }, {});
 
   const bestService = Object.entries(incomeByService).sort(([, a], [, b]) => b - a)[0];
+
+  // Calculate average revenue per active month
+  const getAvgMonthlyRevenue = () => {
+    if (incomeTransactions.length === 0) return '—';
+    const dates = incomeTransactions.map(t => new Date(t.date).getTime());
+    const minDate = new Date(Math.min(...dates));
+    const maxDate = new Date();
+    const diffMonths = (maxDate.getFullYear() - minDate.getFullYear()) * 12 + (maxDate.getMonth() - minDate.getMonth()) + 1;
+    const months = Math.max(1, diffMonths);
+    return `₵${(totalIncome / months).toFixed(2)}`;
+  };
+
+  // Calculate Client Lifetime Value (LTV)
+  const getClientLTV = () => {
+    const uniqueClients = [...new Set(incomeTransactions.map(t => t.clientName).filter(Boolean))];
+    if (uniqueClients.length === 0) return '—';
+    return `₵${(totalIncome / uniqueClients.length).toFixed(2)}`;
+  };
 
   return (
     <div className="space-y-8 pb-10">
@@ -147,6 +165,16 @@ export const Reports = () => {
                   ? `₵${(totalIncome / incomeTransactions.length).toFixed(2)}`
                   : '—'
               }
+            />
+            <HighlightRow
+              icon={Calendar}
+              label="Avg. Monthly Revenue"
+              value={getAvgMonthlyRevenue()}
+            />
+            <HighlightRow
+              icon={Users}
+              label="Client Lifetime Value (LTV)"
+              value={getClientLTV()}
             />
           </div>
 

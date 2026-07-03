@@ -30,18 +30,29 @@ export const TransactionSchema = {
 };
 
 /**
+ * @typedef {Object} SocialMedia
+ * @property {string} [instagram] - Instagram handle
+ * @property {string} [snapchat] - Snapchat handle
+ * @property {string} [tiktok] - TikTok username
+ * @property {string} [whatsapp] - WhatsApp contact number
+ *
  * @typedef {Object} Client
  * @property {string} id - Unique identifier.
  * @property {string} name - Full name of the client.
  * @property {string} [phone] - Mobile phone number contact.
- * @property {string} [instagram] - Instagram handle (e.g. @username).
+ * @property {SocialMedia} [socialMedia] - Social media connection details.
  * @property {string} [notes] - Additional customer preferences or notes.
  */
 export const ClientSchema = {
   id: 'string',
   name: 'string',
   phone: 'string (optional)',
-  instagram: 'string (optional)',
+  socialMedia: {
+    instagram: 'string (optional)',
+    snapchat: 'string (optional)',
+    tiktok: 'string (optional)',
+    whatsapp: 'string (optional)',
+  },
   notes: 'string (optional)'
 };
 

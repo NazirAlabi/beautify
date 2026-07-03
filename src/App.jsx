@@ -16,13 +16,13 @@ const Reports = lazy(() => import('./pages/Reports').then(m => ({ default: m.Rep
 // A simple premium-looking skeleton loader for page transitions
 const PageLoader = () => (
   <div className="w-full space-y-6 py-6 animate-pulse">
-    <div className="h-10 bg-[var(--surface-hover)] rounded-xl w-1/3" />
+    <div className="h-10 bg-(--surface-hover) rounded-xl w-1/3" />
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="h-28 bg-[var(--surface-hover)] rounded-2xl" />
+        <div key={i} className="h-28 bg-(--surface-hover) rounded-2xl" />
       ))}
     </div>
-    <div className="h-64 bg-[var(--surface-hover)] rounded-2xl" />
+    <div className="h-64 bg-(--surface-hover) rounded-2xl" />
   </div>
 );
 

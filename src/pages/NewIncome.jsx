@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle, Sparkles, UserPlus, X } from 'lucide-react';
+import { PlusCircle, Sparkles, UserPlus, X, Plus } from 'lucide-react';
 
 import { PageHeader } from '../components/PageHeader';
 import { GlassCard } from '../components/GlassCard';
@@ -28,13 +28,22 @@ export const NewIncome = () => {
     // Inline Client Creation fields
     newClientName: '',
     newClientPhone: '',
-    newClientInstagram: '',
   });
 
   // Services selected for this transaction
   const [selectedServices, setSelectedServices] = useState([]);
   // Newly created services to register on submission
   const [newServicesToRegister, setNewServicesToRegister] = useState([]);
+
+  // Inline Client Creation socials
+  const [inlineSocialPlatform, setInlineSocialPlatform] = useState('snapchat'); // default to snapchat
+  const [inlineSocialValue, setInlineSocialValue] = useState('');
+  const [inlineSocialsMap, setInlineSocialsMap] = useState({
+    snapchat: '',
+    instagram: '',
+    tiktok: '',
+    whatsapp: '',
+  });
 
   const isCreatingNewService = formData.serviceDropdown === 'NEW_SERVICE';
   const isCreatingNewClient = formData.client === 'NEW_CLIENT';
@@ -90,7 +99,6 @@ export const NewIncome = () => {
 
   const handleRemoveService = (idToRemove) => {
     setSelectedServices(prev => prev.filter(s => s.id !== idToRemove));
-    // Also remove from pending registration if it was a custom one
     const nameToRemove = selectedServices.find(s => s.id === idToRemove)?.name;
     if (nameToRemove) {
       setNewServicesToRegister(prev => prev.filter(ns => ns.name !== nameToRemove));
@@ -102,6 +110,23 @@ export const NewIncome = () => {
     setFormData(prev => ({ ...prev, client: value }));
   };
 
+  const handleAddInlineSocial = (e) => {
+    e.preventDefault();
+    if (!inlineSocialValue.trim()) return;
+    setInlineSocialsMap(prev => ({
+      ...prev,
+      [inlineSocialPlatform]: inlineSocialValue.trim()
+    }));
+    setInlineSocialValue('');
+  };
+
+  const handleRemoveInlineSocial = (platform) => {
+    setInlineSocialsMap(prev => ({
+      ...prev,
+      [platform]: ''
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -110,7 +135,6 @@ export const NewIncome = () => {
       return;
     }
 
-    // Join all selected service names into category column
     const transactionCategory = selectedServices.map(s => s.name).join(', ');
 
     let transactionClientName = '';
@@ -119,10 +143,17 @@ export const NewIncome = () => {
     // Handle Client Profile
     if (isCreatingNewClient) {
       transactionClientName = formData.newClientName.trim();
+
+      // Incorporate any unsubmitted social input value
+      const finalSocials = { ...inlineSocialsMap };
+      if (inlineSocialValue.trim()) {
+        finalSocials[inlineSocialPlatform] = inlineSocialValue.trim();
+      }
+
       newClientPayload = {
         name: formData.newClientName.trim(),
         phone: formData.newClientPhone.trim(),
-        instagram: formData.newClientInstagram.trim(),
+        socialMedia: finalSocials,
       };
     } else if (formData.client && formData.client !== 'NONE') {
       const selectedClient = clients.find(c => c.id === formData.client);
@@ -153,10 +184,12 @@ export const NewIncome = () => {
         newServicePrice: '',
         newClientName: '',
         newClientPhone: '',
-        newClientInstagram: '',
       });
       setSelectedServices([]);
       setNewServicesToRegister([]);
+      setInlineSocialsMap({ snapchat: '', instagram: '', tiktok: '', whatsapp: '' });
+      setInlineSocialValue('');
+      setInlineSocialPlatform('snapchat');
     } else {
       navigate('/transactions');
     }
@@ -313,6 +346,7 @@ export const NewIncome = () => {
                   onChange={(e) => setFormData({ ...formData, newClientName: e.target.value })}
                   placeholder="e.g. Abena Mansa"
                 />
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     label="Phone Number (Optional)"
@@ -321,13 +355,65 @@ export const NewIncome = () => {
                     onChange={(e) => setFormData({ ...formData, newClientPhone: e.target.value })}
                     placeholder="e.g. 024XXXXXXX"
                   />
-                  <FormField
-                    label="Instagram Handle (Optional)"
-                    type="text"
-                    value={formData.newClientInstagram}
-                    onChange={(e) => setFormData({ ...formData, newClientInstagram: e.target.value })}
-                    placeholder="e.g. @abena_nails"
-                  />
+                  
+                  {/* Dynamic Social Accounts Block (Spacious & Clean Layout) */}
+                  <div className="space-y-3 p-4 rounded-2xl bg-secondary/10 dark:bg-muted/20 border border-border/30">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Add Social Account</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <select
+                        className="glass-input h-11 w-full text-sm"
+                        value={inlineSocialPlatform}
+                        onChange={(e) => {
+                          setInlineSocialPlatform(e.target.value);
+                          setInlineSocialValue(inlineSocialsMap[e.target.value] || '');
+                        }}
+                      >
+                        <option value="snapchat">Snapchat</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="whatsapp">WhatsApp</option>
+                      </select>
+                      <input
+                        type="text"
+                        className="glass-input h-11 sm:col-span-2"
+                        value={inlineSocialValue}
+                        onChange={(e) => setInlineSocialValue(e.target.value)}
+                        placeholder={inlineSocialPlatform === 'whatsapp' ? 'e.g. 024XXXXXXX' : 'e.g. @handle'}
+                      />
+                    </div>
+                    <div className="flex justify-end pt-1">
+                      <button
+                        type="button"
+                        onClick={handleAddInlineSocial}
+                        className="btn-secondary py-2 px-4 flex items-center justify-center gap-1.5 text-xs font-bold"
+                      >
+                        <Plus size={14} /> Add Platform
+                      </button>
+                    </div>
+                  </div>
+
+                    {/* Displaying Social Badges/Tags inside Inline Form */}
+                    {Object.entries(inlineSocialsMap).some(([, val]) => val) && (
+                      <div className="flex flex-wrap gap-1.5 pt-1 animate-slide-up">
+                        {Object.entries(inlineSocialsMap)
+                          .filter(([, val]) => val)
+                          .map(([platform, handle]) => (
+                            <span
+                              key={platform}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold animate-scale-in"
+                            >
+                              <span className="capitalize">{platform}: {handle}</span>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveInlineSocial(platform)}
+                                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-0.5 rounded-full"
+                              >
+                                <X size={12} />
+                              </button>
+                            </span>
+                          ))}
+                      </div>
+                    )}
                 </div>
               </div>
             </GlassCard>
