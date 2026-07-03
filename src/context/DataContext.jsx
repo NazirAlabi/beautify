@@ -34,7 +34,8 @@ export const DataProvider = ({ children }) => {
         api.getExpenseCategories()
       ]);
 
-      setTransactions(txs);
+      // Ensure transactions are sorted newest to oldest
+      setTransactions(txs.sort((a, b) => new Date(b.date) - new Date(a.date)));
       
       // Normalize any legacy/flat client objects to match the new socialMedia schema structure
       const normalizedClients = cls.map(c => {
@@ -180,7 +181,10 @@ export const DataProvider = ({ children }) => {
       });
 
       const savedTx = await api.addTransaction(cleanTransaction);
-      setTransactions(prev => [savedTx, ...prev]);
+      setTransactions(prev => {
+        const newArr = [savedTx, ...prev];
+        return newArr.sort((a, b) => new Date(b.date) - new Date(a.date));
+      });
     } catch (err) {
       console.error("Failed to add transaction:", err);
     }

@@ -111,7 +111,7 @@ export const Dashboard = () => {
     <div className="space-y-8">
       <div className="flex justify-between items-end">
         <PageHeader
-          title={`${greeting} ✨`}
+          title={`${greeting} CEO✨`}
           subtitle="Here's what's happening with your business today."
         />
         {useCached && homePageMetrics.lastUpdated && (
