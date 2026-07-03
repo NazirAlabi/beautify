@@ -13,6 +13,7 @@ const Transactions = lazy(() => import('./pages/Transactions').then(m => ({ defa
 const Clients = lazy(() => import('./pages/Clients').then(m => ({ default: m.Clients })));
 const Reports = lazy(() => import('./pages/Reports').then(m => ({ default: m.Reports })));
 const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
+const Landing = lazy(() => import('./pages/Landing').then(m => ({ default: m.Landing })));
 
 // A simple premium-looking skeleton loader for page transitions
 const PageLoader = () => (
@@ -28,6 +29,8 @@ const PageLoader = () => (
 );
 
 import { useData } from './context/DataContext';
+import { ToastProvider } from './context/ToastContext';
+import { ConfirmProvider } from './context/ConfirmContext';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -77,17 +80,33 @@ const Layout = ({ children }) => {
 function App() {
   return (
     <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/income/new" element={<NewIncome />} />
-          <Route path="/expense/new" element={<NewExpense />} />
-          <Route path="/transactions" element={<Transactions />} />
-          <Route path="/clients" element={<Clients />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
-      </Layout>
+      <ToastProvider>
+        <ConfirmProvider>
+          <Routes>
+            {/* Public Landing Route */}
+            <Route path="/" element={
+              <Suspense fallback={<PageLoader />}>
+                <Landing />
+              </Suspense>
+            } />
+            
+            {/* Authenticated App Routes within Layout */}
+            <Route path="/*" element={
+              <Layout>
+                <Routes>
+                  <Route path="/home" element={<Dashboard />} />
+                  <Route path="/income/new" element={<NewIncome />} />
+                  <Route path="/expense/new" element={<NewExpense />} />
+                  <Route path="/transactions" element={<Transactions />} />
+                  <Route path="/clients" element={<Clients />} />
+                  <Route path="/reports" element={<Reports />} />
+                  <Route path="/settings" element={<Settings />} />
+                </Routes>
+              </Layout>
+            } />
+          </Routes>
+        </ConfirmProvider>
+      </ToastProvider>
     </Router>
   );
 }

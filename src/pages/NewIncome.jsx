@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Sparkles, UserPlus, X, Plus } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 import { PageHeader } from '../components/PageHeader';
 import { GlassCard } from '../components/GlassCard';
@@ -12,6 +13,7 @@ import { Button } from '../components/Button';
 export const NewIncome = () => {
   const { services, clients, addTransaction } = useData();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [formData, setFormData] = useState({
     date: new Date().toISOString().slice(0, 10),
@@ -131,7 +133,7 @@ export const NewIncome = () => {
     e.preventDefault();
 
     if (selectedServices.length === 0) {
-      alert("Please select at least one service.");
+      toast.error("Please select at least one service.");
       return;
     }
 
@@ -171,6 +173,8 @@ export const NewIncome = () => {
       newClient: newClientPayload || undefined,
       newServices: newServicesToRegister.length > 0 ? newServicesToRegister : undefined,
     });
+    
+    toast.success('Income recorded successfully!');
 
     if (e.nativeEvent.submitter.name === 'saveAndAdd') {
       setFormData({

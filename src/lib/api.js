@@ -42,7 +42,7 @@ export const api = {
   async addTransaction(transaction) {
     if (isMockFirebase) {
       const local = getLocal('transactions', []);
-      const newTx = { ...transaction, id: Date.now().toString() };
+      const newTx = { ...transaction, id: 't' + Date.now().toString() + Math.random().toString(36).substring(2, 6) };
       setLocal('transactions', [newTx, ...local]);
       return newTx;
     }
@@ -52,20 +52,22 @@ export const api = {
 
   // ─── Clients ─────────────────────────────────────────────────────────
   async getClients() {
-    if (isMockFirebase) return getLocal('clients', []);
+    if (isMockFirebase) return getLocal('clients', []).filter(c => !c.isArchived);
     try {
       const querySnapshot = await getDocs(collection(db, 'clients'));
-      return querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      return querySnapshot.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(c => !c.isArchived);
     } catch (e) {
       console.warn("Firestore error, falling back to local storage:", e);
-      return getLocal('clients', []);
+      return getLocal('clients', []).filter(c => !c.isArchived);
     }
   },
 
   async addClient(client) {
     if (isMockFirebase) {
       const local = getLocal('clients', []);
-      const newClient = { ...client, id: 'c' + Date.now() };
+      const newClient = { ...client, id: 'c' + Date.now().toString() + Math.random().toString(36).substring(2, 6) };
       setLocal('clients', [newClient, ...local]);
       return newClient;
     }
@@ -87,29 +89,31 @@ export const api = {
   async deleteClient(id) {
     if (isMockFirebase) {
       const local = getLocal('clients', []);
-      setLocal('clients', local.filter(c => c.id !== id));
+      setLocal('clients', local.map(c => c.id === id ? { ...c, isArchived: true } : c));
       return;
     }
     const ref = doc(db, 'clients', id);
-    await deleteDoc(ref);
+    await updateDoc(ref, { isArchived: true });
   },
 
   // ─── Services ────────────────────────────────────────────────────────
   async getServices() {
-    if (isMockFirebase) return getLocal('services', []);
+    if (isMockFirebase) return getLocal('services', []).filter(s => !s.isArchived);
     try {
       const querySnapshot = await getDocs(collection(db, 'services'));
-      return querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      return querySnapshot.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(s => !s.isArchived);
     } catch (e) {
       console.warn("Firestore error, falling back to local storage:", e);
-      return getLocal('services', []);
+      return getLocal('services', []).filter(s => !s.isArchived);
     }
   },
 
   async addService(service) {
     if (isMockFirebase) {
       const local = getLocal('services', []);
-      const newService = { ...service, id: 's' + Date.now() };
+      const newService = { ...service, id: 's' + Date.now().toString() + Math.random().toString(36).substring(2, 6) };
       setLocal('services', [...local, newService]);
       return newService;
     }
@@ -130,11 +134,11 @@ export const api = {
   async deleteService(id) {
     if (isMockFirebase) {
       const local = getLocal('services', []);
-      setLocal('services', local.filter(s => s.id !== id));
+      setLocal('services', local.map(s => s.id === id ? { ...s, isArchived: true } : s));
       return;
     }
     const ref = doc(db, 'services', id);
-    await deleteDoc(ref);
+    await updateDoc(ref, { isArchived: true });
   },
 
   // ─── Expense Categories ──────────────────────────────────────────────

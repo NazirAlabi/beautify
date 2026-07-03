@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
+import { useToast } from '../context/ToastContext';
+import { useConfirm } from '../context/ConfirmContext';
 import { Plus, Trash2, Edit3, Save, X, Sparkles, Receipt } from 'lucide-react';
 
 import { PageHeader } from '../components/PageHeader';
@@ -17,6 +19,9 @@ export const Settings = () => {
     addExpenseCategory,
     removeExpenseCategory,
   } = useData();
+
+  const toast = useToast();
+  const { confirm } = useConfirm();
 
   // Service Forms States
   const [newServiceName, setNewServiceName] = useState('');
@@ -39,6 +44,7 @@ export const Settings = () => {
       defaultPrice: parseFloat(newServicePrice) || 0,
     });
     
+    toast.success('Service created successfully!');
     setNewServiceName('');
     setNewServicePrice('');
   };
@@ -57,12 +63,19 @@ export const Settings = () => {
       defaultPrice: parseFloat(editServicePrice) || 0,
     });
     
+    toast.success('Service updated successfully!');
     setEditingServiceId(null);
   };
 
-  const handleDeleteService = (id, name) => {
-    if (window.confirm(`Are you sure you want to delete the service "${name}"?`)) {
+  const handleDeleteService = async (id, name) => {
+    const isConfirmed = await confirm({
+      title: 'Delete Service',
+      message: `Are you sure you want to delete "${name}"? This action cannot be undone.`,
+      confirmText: 'Delete',
+    });
+    if (isConfirmed) {
       deleteService(id);
+      toast.success('Service deleted.');
     }
   };
 
@@ -75,17 +88,24 @@ export const Settings = () => {
     
     // Avoid duplicates (case-insensitive)
     if (expenseCategories.some(c => c.toLowerCase() === formattedCategory.toLowerCase())) {
-      alert("This category already exists.");
+      toast.error("This category already exists.");
       return;
     }
 
     addExpenseCategory(formattedCategory);
+    toast.success('Category created successfully!');
     setNewCategoryName('');
   };
 
-  const handleDeleteCategory = (category) => {
-    if (window.confirm(`Are you sure you want to delete the category "${category}"?`)) {
+  const handleDeleteCategory = async (category) => {
+    const isConfirmed = await confirm({
+      title: 'Delete Category',
+      message: `Are you sure you want to delete "${category}"?`,
+      confirmText: 'Delete',
+    });
+    if (isConfirmed) {
       removeExpenseCategory(category);
+      toast.success('Category deleted.');
     }
   };
 

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useData } from '../context/DataContext';
+import { useToast } from '../context/ToastContext';
+import { useConfirm } from '../context/ConfirmContext';
 import { Search, UserPlus, Edit3, Trash2, X, Plus } from 'lucide-react';
 
 import { PageHeader } from '../components/PageHeader';
@@ -92,6 +94,8 @@ const ClientCard = ({ client, stats, onEdit, onDelete }) => {
 
 export const Clients = () => {
   const { clients, transactions, addClient, updateClient, deleteClient } = useData();
+  const toast = useToast();
+  const { confirm } = useConfirm();
   const [search, setSearch] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
@@ -152,9 +156,15 @@ export const Clients = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (client) => {
-    if (window.confirm(`Are you sure you want to delete client "${client.name}"?`)) {
+  const handleDelete = async (client) => {
+    const isConfirmed = await confirm({
+      title: 'Delete Client',
+      message: `Are you sure you want to delete client "${client.name}"? All their history will be retained but they will be removed from the list.`,
+      confirmText: 'Delete',
+    });
+    if (isConfirmed) {
       deleteClient(client.id);
+      toast.success('Client deleted.');
     }
   };
 
@@ -194,8 +204,10 @@ export const Clients = () => {
 
     if (editingClient) {
       updateClient(editingClient.id, payload);
+      toast.success('Client updated successfully!');
     } else {
       addClient(payload);
+      toast.success('Client added successfully!');
     }
     setIsModalOpen(false);
   };

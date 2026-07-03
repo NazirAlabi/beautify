@@ -4,7 +4,7 @@ import { Home, PlusCircle, MinusCircle, Users, List, BarChart3, Sparkles, Moon, 
 import { useTheme } from '../context/ThemeContext';
 
 const navItems = [
-  { path: '/', icon: Home, label: 'Home' },
+  { path: '/home', icon: Home, label: 'Home' },
   { path: '/income/new', icon: PlusCircle, label: 'Income' },
   { path: '/expense/new', icon: MinusCircle, label: 'Expense' },
   { path: '/transactions', icon: List, label: 'History' },

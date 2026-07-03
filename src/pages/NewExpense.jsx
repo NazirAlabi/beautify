@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { MinusCircle, FolderPlus } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 import { PageHeader } from '../components/PageHeader';
 import { GlassCard } from '../components/GlassCard';
@@ -11,6 +12,7 @@ import { Button } from '../components/Button';
 export const NewExpense = () => {
   const { expenseCategories, addTransaction } = useData();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [formData, setFormData] = useState({
     date: new Date().toISOString().slice(0, 10),
@@ -34,6 +36,7 @@ export const NewExpense = () => {
       description: formData.description,
       vendor: formData.vendor,
     });
+    toast.success('Expense recorded successfully!');
     navigate('/transactions');
   };
 

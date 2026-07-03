@@ -108,6 +108,7 @@
   --animate-fade-in: fade-in 0.4s ease-out both;
   --animate-slide-up: slide-up 0.3s ease-out both;
   --animate-scale-in: scale-in 0.3s ease-out both;
+  --animate-gradient-pan: gradient-pan 15s ease infinite;
 }
 
 /* ─── Keyframes ────────────────────────────── */
@@ -130,12 +131,17 @@
 }
 @keyframes gradient-drift {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  25%      { transform: translate(30px, -20px) scale(1.05); }
-  50%      { transform: translate(-20px, 20px) scale(0.95); }
+  25%      { transform: translate(30px, -50px) scale(1.15); }
+  50%      { transform: translate(-20px, 40px) scale(0.85); }
   75%      { transform: translate(10px, 10px) scale(1.02); }
 }
 @keyframes progress-fill {
   from { width: 0%; }
+}
+@keyframes gradient-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* ─── Base ─────────────────────────────────── */
@@ -247,7 +253,7 @@
     border-radius: 50%;
     filter: blur(80px);
     pointer-events: none;
-    animation: gradient-drift 20s ease-in-out infinite;
+    animation: gradient-drift 7s ease-in-out infinite;
     will-change: transform;
   }
 

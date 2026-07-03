@@ -8,7 +8,7 @@ import { DollarSign, TrendingUp, Calendar, Sparkles, ArrowRight } from 'lucide-r
 import { PageHeader } from '../components/PageHeader';
 import { StatCard } from '../components/StatCard';
 import { GlassCard } from '../components/GlassCard';
-import { Badge } from '../components/Badge';
+
 import { EmptyState } from '../components/EmptyState';
 
 export const Dashboard = () => {
