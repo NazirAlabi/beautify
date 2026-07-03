@@ -41,7 +41,6 @@ export const NewExpense = () => {
     <div className="max-w-2xl mx-auto space-y-6 pb-10">
       <PageHeader
         title="Record Expense"
-        titleClassName="text-destructive"
         subtitle="Track your business spending"
       />
 
@@ -77,8 +76,8 @@ export const NewExpense = () => {
                 </datalist>
               </div>
               {isNewCategory && (
-                <p className="text-xs text-accent-coral mt-1.5 font-medium flex items-center gap-1.5 animate-fade-in">
-                  <FolderPlus size={13} />
+                <p className="text-xs text-muted-foreground mt-1.5 font-medium flex items-center gap-1.5 animate-fade-in">
+                  <FolderPlus size={13} className="text-accent-lavender" />
                   <span>New category "<strong>{formData.category.trim()}</strong>" will be created</span>
                 </p>
               )}

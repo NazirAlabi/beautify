@@ -19,8 +19,8 @@
   --success-light: hsl(152, 55%, 94%);
   --warning-h: 38 92% 50%;
   --warning-light: hsl(38, 92%, 94%);
-  --destructive-h: 350 75% 52%;
-  --destructive-light: hsl(350, 75%, 95%);
+  --destructive-h: 350 65% 60%;
+  --destructive-light: hsl(350, 65%, 96%);
   --info-h: 215 80% 56%;
   --info-light: hsl(215, 80%, 94%);
   /* Glass surfaces */
@@ -51,6 +51,7 @@
   --input-border-c: hsl(225, 15%, 22%);
   --success-light: hsl(152, 40%, 14%);
   --warning-light: hsl(38, 50%, 14%);
+  --destructive-h: 350 50% 64%;
   --destructive-light: hsl(350, 45%, 14%);
   --info-light: hsl(215, 50%, 14%);
   /* Glass surfaces */

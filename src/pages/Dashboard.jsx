@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { isSameDay, isSameWeek, isSameMonth, parseISO } from 'date-fns';
+import { isSameDay, isSameWeek, isSameMonth, parseISO, subWeeks, startOfWeek, endOfWeek, isWithinInterval } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { DollarSign, TrendingUp, Calendar, Sparkles, ArrowRight } from 'lucide-react';
 
@@ -39,15 +39,39 @@ export const Dashboard = () => {
 
   const profit = thisMonthsEarnings - thisMonthsExpenses;
 
-  const chartData = [
-    { name: 'Mon', amount: 120 },
-    { name: 'Tue', amount: 200 },
-    { name: 'Wed', amount: 150 },
-    { name: 'Thu', amount: 80 },
-    { name: 'Fri', amount: 300 },
-    { name: 'Sat', amount: 450 },
-    { name: 'Sun', amount: 0 },
+  // Calculate dynamic 3-week intervals
+  const weeksIntervals = [
+    {
+      name: '2 Weeks Ago',
+      start: startOfWeek(subWeeks(today, 2)),
+      end: endOfWeek(subWeeks(today, 2)),
+    },
+    {
+      name: 'Last Week',
+      start: startOfWeek(subWeeks(today, 1)),
+      end: endOfWeek(subWeeks(today, 1)),
+    },
+    {
+      name: 'This Week',
+      start: startOfWeek(today),
+      end: endOfWeek(today),
+    },
   ];
+
+  const chartData = weeksIntervals.map(w => {
+    const amount = incomeTransactions
+      .filter(t => {
+        try {
+          const d = parseISO(t.date);
+          return isWithinInterval(d, { start: w.start, end: w.end });
+        } catch {
+          return false;
+        }
+      })
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    return { name: w.name, amount };
+  });
 
   return (
     <div className="space-y-8">
@@ -99,7 +123,7 @@ export const Dashboard = () => {
         <GlassCard hover className="p-6">
           <h3 className="font-semibold mb-6 text-foreground tracking-tight flex items-center gap-2">
             <div className="w-1 h-5 bg-linear-to-b from-primary to-accent-coral rounded-full" />
-            Weekly Earnings
+           Recent Earnings
           </h3>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">

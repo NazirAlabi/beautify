@@ -7,7 +7,7 @@ import React from 'react';
 export const Badge = ({ children, variant = 'neutral', className = '' }) => {
   const styles = {
     income:  'bg-success-light text-success',
-    expense: 'bg-destructive-light text-destructive',
+    expense: 'bg-destructive-light text-destructive border border-destructive/10 dark:border-destructive/20',
     success: 'bg-success-light text-success',
     warning: 'bg-warning-light text-warning',
     info:    'bg-info-light text-info',

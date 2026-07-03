@@ -1,203 +1,240 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { subDays } from 'date-fns';
+import { api } from '../lib/api';
 
 const DataContext = createContext();
 
 export const useData = () => useContext(DataContext);
 
-// Initial Mock Data
-const generateMockData = () => {
-  const today = new Date();
+const initialServicesSeed = [
+  { name: 'Soft Glam', defaultPrice: 150 },
+  { name: 'Bridal', defaultPrice: 200 },
+  { name: 'Natural Makeup', defaultPrice: 100 },
+];
 
-  return {
-    transactions: [
-      { id: '1', type: 'income', amount: 150, category: 'Soft Glam', date: today.toISOString(), paymentMethod: 'Cash', clientName: 'Ama' },
-      { id: '2', type: 'expense', amount: 80, category: 'Makeup products', date: today.toISOString(), description: 'Foundation', vendor: 'Melcom' },
-      { id: '3', type: 'income', amount: 200, category: 'Bridal', date: subDays(today, 1).toISOString(), paymentMethod: 'Momo', clientName: 'Efia' },
-    ],
-    clients: [
-      { id: 'c1', name: 'Ama', phone: '0241234567', instagram: '@ama', notes: 'Prefers soft glam' },
-      { id: 'c2', name: 'Efia', phone: '0209876543', instagram: '@efia', notes: 'Bridal client' },
-    ],
-    services: [
-      { id: 's1', name: 'Soft Glam', defaultPrice: 150 },
-      { id: 's2', name: 'Bridal', defaultPrice: 200 },
-      { id: 's3', name: 'Natural Makeup', defaultPrice: 100 },
-    ],
-    expenseCategories: [
-      'Makeup products',
-      'Transportation',
-      'Food',
-      'Equipment',
-      'Utilities',
-      'Miscellaneous',
-    ],
-  };
-};
+const initialCategoriesSeed = [
+  'Makeup products',
+  'Transportation',
+  'Food',
+  'Equipment',
+  'Utilities',
+  'Miscellaneous',
+];
 
 export const DataProvider = ({ children }) => {
-  const [data, setData] = useState(() => {
-    const saved = localStorage.getItem('beauty_tracker_data');
-    if (saved) return JSON.parse(saved);
-    return generateMockData();
-  });
+  const [transactions, setTransactions] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [services, setServices] = useState([]);
+  const [expenseCategories, setExpenseCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  // Load all data on mount
   useEffect(() => {
-    localStorage.setItem('beauty_tracker_data', JSON.stringify(data));
-  }, [data]);
+    const loadAllData = async () => {
+      try {
+        const [txs, cls, srvs, cats] = await Promise.all([
+          api.getTransactions(),
+          api.getClients(),
+          api.getServices(),
+          api.getExpenseCategories()
+        ]);
+
+        setTransactions(txs);
+        setClients(cls);
+
+        // Auto-seed empty list states for a smoother first-run experience
+        if (srvs.length === 0) {
+          const seeded = await Promise.all(
+            initialServicesSeed.map(s => api.addService(s))
+          );
+          setServices(seeded);
+        } else {
+          setServices(srvs);
+        }
+
+        if (cats.length === 0) {
+          await api.saveExpenseCategories(initialCategoriesSeed);
+          setExpenseCategories(initialCategoriesSeed);
+        } else {
+          setExpenseCategories(cats);
+        }
+      } catch (err) {
+        console.error("Error loading application state:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAllData();
+  }, []);
 
   // ─── Transactions ────────────────────────────
 
-  const addTransaction = (transaction) => {
-    setData(prev => {
-      let updatedClients = [...prev.clients];
-      let updatedServices = [...prev.services];
-      let updatedCategories = [...prev.expenseCategories];
-
-      // If a full custom client details payload is provided
+  const addTransaction = async (transaction) => {
+    try {
+      // 1. Handle inline client creation if provided
+      let clientObj = null;
       if (transaction.newClient) {
-        const clientExists = prev.clients.some(
+        const clientExists = clients.some(
           c => c.name.toLowerCase() === transaction.newClient.name.toLowerCase()
         );
         if (!clientExists) {
-          updatedClients = [
-            {
-              id: 'c' + Date.now(),
-              name: transaction.newClient.name,
-              phone: transaction.newClient.phone || '',
-              instagram: transaction.newClient.instagram || '',
-              notes: transaction.newClient.notes || '',
-            },
-            ...prev.clients,
-          ];
+          clientObj = await api.addClient({
+            name: transaction.newClient.name,
+            phone: transaction.newClient.phone || '',
+            instagram: transaction.newClient.instagram || '',
+            notes: transaction.newClient.notes || '',
+          });
+          setClients(prev => [clientObj, ...prev]);
         }
       } else if (
         transaction.clientName &&
-        !prev.clients.some(c => c.name.toLowerCase() === transaction.clientName.toLowerCase())
+        !clients.some(c => c.name.toLowerCase() === transaction.clientName.toLowerCase())
       ) {
-        updatedClients = [
-          { id: 'c' + Date.now(), name: transaction.clientName, phone: '', instagram: '', notes: '' },
-          ...prev.clients,
-        ];
+        clientObj = await api.addClient({
+          name: transaction.clientName,
+          phone: '',
+          instagram: '',
+          notes: ''
+        });
+        setClients(prev => [clientObj, ...prev]);
       }
 
-      // If inline services array is provided
+      // 2. Handle inline service creation array if provided
       if (transaction.newServices && Array.isArray(transaction.newServices)) {
-        transaction.newServices.forEach((ns, idx) => {
-          const serviceExists = prev.services.some(
+        const createdServices = [];
+        for (const ns of transaction.newServices) {
+          const serviceExists = services.some(
             s => s.name.toLowerCase() === ns.name.toLowerCase()
           );
           if (!serviceExists) {
-            updatedServices.push({
-              id: 's' + Date.now() + '-' + idx,
+            const newSrv = await api.addService({
               name: ns.name,
               defaultPrice: parseFloat(ns.defaultPrice) || 0,
             });
+            createdServices.push(newSrv);
           }
-        });
+        }
+        if (createdServices.length > 0) {
+          setServices(prev => [...prev, ...createdServices]);
+        }
       } else if (transaction.newService) {
-        const serviceExists = prev.services.some(
+        const serviceExists = services.some(
           s => s.name.toLowerCase() === transaction.newService.name.toLowerCase()
         );
         if (!serviceExists) {
-          updatedServices = [
-            ...prev.services,
-            {
-              id: 's' + Date.now(),
-              name: transaction.newService.name,
-              defaultPrice: parseFloat(transaction.newService.defaultPrice) || 0,
-            },
-          ];
+          const newSrv = await api.addService({
+            name: transaction.newService.name,
+            defaultPrice: parseFloat(transaction.newService.defaultPrice) || 0,
+          });
+          setServices(prev => [...prev, newSrv]);
         }
-      } else if (
-        transaction.type === 'income' &&
-        transaction.category &&
-        !prev.services.some(s => s.name.toLowerCase() === transaction.category.toLowerCase())
-      ) {
-        updatedServices = [
-          ...prev.services,
-          { id: 's' + Date.now(), name: transaction.category, defaultPrice: transaction.amount || 0 },
-        ];
       }
 
-      // Auto-create expense category
-      if (
-        transaction.type === 'expense' &&
-        transaction.category &&
-        !prev.expenseCategories.some(c => c.toLowerCase() === transaction.category.toLowerCase())
-      ) {
-        updatedCategories = [...prev.expenseCategories, transaction.category];
-      }
-
+      // 3. Save clean transaction document
       const cleanTransaction = { ...transaction };
       delete cleanTransaction.newClient;
       delete cleanTransaction.newService;
       delete cleanTransaction.newServices;
 
-      return {
-        ...prev,
-        transactions: [{ ...cleanTransaction, id: Date.now().toString() }, ...prev.transactions],
-        clients: updatedClients,
-        services: updatedServices,
-        expenseCategories: updatedCategories,
-      };
-    });
+      const savedTx = await api.addTransaction(cleanTransaction);
+      setTransactions(prev => [savedTx, ...prev]);
+    } catch (err) {
+      console.error("Failed to add transaction:", err);
+    }
   };
 
   // ─── Clients ─────────────────────────────────
 
-  const addClient = (client) => {
-    setData(prev => ({
-      ...prev,
-      clients: [{ ...client, id: 'c' + Date.now() }, ...prev.clients],
-    }));
+  const addClient = async (client) => {
+    try {
+      const saved = await api.addClient(client);
+      setClients(prev => [saved, ...prev]);
+    } catch (err) {
+      console.error("Failed to add client:", err);
+    }
+  };
+
+  const updateClient = async (id, updates) => {
+    try {
+      await api.updateClient(id, updates);
+      setClients(prev => prev.map(c => c.id === id ? { ...c, ...updates } : c));
+    } catch (err) {
+      console.error("Failed to update client:", err);
+    }
+  };
+
+  const deleteClient = async (id) => {
+    try {
+      await api.deleteClient(id);
+      setClients(prev => prev.filter(c => c.id !== id));
+    } catch (err) {
+      console.error("Failed to delete client:", err);
+    }
   };
 
   // ─── Services ────────────────────────────────
 
-  const addService = (service) => {
-    setData(prev => ({
-      ...prev,
-      services: [...prev.services, { ...service, id: 's' + Date.now() }],
-    }));
+  const addService = async (service) => {
+    try {
+      const saved = await api.addService(service);
+      setServices(prev => [...prev, saved]);
+    } catch (err) {
+      console.error("Failed to add service:", err);
+    }
   };
 
-  const updateService = (id, updates) => {
-    setData(prev => ({
-      ...prev,
-      services: prev.services.map(s => (s.id === id ? { ...s, ...updates } : s)),
-    }));
+  const updateService = async (id, updates) => {
+    try {
+      await api.updateService(id, updates);
+      setServices(prev => prev.map(s => (s.id === id ? { ...s, ...updates } : s)));
+    } catch (err) {
+      console.error("Failed to update service:", err);
+    }
   };
 
-  const deleteService = (id) => {
-    setData(prev => ({
-      ...prev,
-      services: prev.services.filter(s => s.id !== id),
-    }));
+  const deleteService = async (id) => {
+    try {
+      await api.deleteService(id);
+      setServices(prev => prev.filter(s => s.id !== id));
+    } catch (err) {
+      console.error("Failed to delete service:", err);
+    }
   };
 
   // ─── Expense Categories ──────────────────────
 
-  const addExpenseCategory = (category) => {
-    setData(prev => ({
-      ...prev,
-      expenseCategories: [...prev.expenseCategories, category],
-    }));
+  const addExpenseCategory = async (category) => {
+    try {
+      const updated = [...expenseCategories, category];
+      await api.saveExpenseCategories(updated);
+      setExpenseCategories(updated);
+    } catch (err) {
+      console.error("Failed to add expense category:", err);
+    }
   };
 
-  const removeExpenseCategory = (category) => {
-    setData(prev => ({
-      ...prev,
-      expenseCategories: prev.expenseCategories.filter(c => c !== category),
-    }));
+  const removeExpenseCategory = async (category) => {
+    try {
+      const updated = expenseCategories.filter(c => c !== category);
+      await api.saveExpenseCategories(updated);
+      setExpenseCategories(updated);
+    } catch (err) {
+      console.error("Failed to delete expense category:", err);
+    }
   };
 
   return (
     <DataContext.Provider
       value={{
-        ...data,
+        transactions,
+        clients,
+        services,
+        expenseCategories,
+        loading,
         addTransaction,
         addClient,
+        updateClient,
+        deleteClient,
         addService,
         updateService,
         deleteService,

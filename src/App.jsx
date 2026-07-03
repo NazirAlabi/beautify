@@ -1,19 +1,36 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
 import { Sidebar } from './components/Sidebar';
 import { BottomNav } from './components/BottomNav';
 import { MobileHeader } from './components/MobileHeader';
 
-import { Dashboard } from './pages/Dashboard';
-import { NewIncome } from './pages/NewIncome';
-import { NewExpense } from './pages/NewExpense';
-import { Transactions } from './pages/Transactions';
-import { Clients } from './pages/Clients';
-import { Reports } from './pages/Reports';
+// Lazy load page components
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
+const NewIncome = lazy(() => import('./pages/NewIncome').then(m => ({ default: m.NewIncome })));
+const NewExpense = lazy(() => import('./pages/NewExpense').then(m => ({ default: m.NewExpense })));
+const Transactions = lazy(() => import('./pages/Transactions').then(m => ({ default: m.Transactions })));
+const Clients = lazy(() => import('./pages/Clients').then(m => ({ default: m.Clients })));
+const Reports = lazy(() => import('./pages/Reports').then(m => ({ default: m.Reports })));
+
+// A simple premium-looking skeleton loader for page transitions
+const PageLoader = () => (
+  <div className="w-full space-y-6 py-6 animate-pulse">
+    <div className="h-10 bg-[var(--surface-hover)] rounded-xl w-1/3" />
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="h-28 bg-[var(--surface-hover)] rounded-2xl" />
+      ))}
+    </div>
+    <div className="h-64 bg-[var(--surface-hover)] rounded-2xl" />
+  </div>
+);
+
+import { useData } from './context/DataContext';
 
 const Layout = ({ children }) => {
   const location = useLocation();
+  const { loading } = useData();
 
   return (
     <div className="min-h-screen text-foreground pb-24 md:pb-0 md:flex relative overflow-hidden">
@@ -41,7 +58,13 @@ const Layout = ({ children }) => {
 
         {/* Page content with fade-in animation */}
         <div key={location.pathname} className="animate-fade-in-up">
-          {children}
+          {loading ? (
+            <PageLoader />
+          ) : (
+            <Suspense fallback={<PageLoader />}>
+              {children}
+            </Suspense>
+          )}
         </div>
       </main>
 
