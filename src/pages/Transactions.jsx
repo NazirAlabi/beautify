@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
+import { useConfirm } from '../context/ConfirmContext';
 
 import { PageHeader } from '../components/PageHeader';
 import { GlassCard } from '../components/GlassCard';
 import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
 import { EmptyState } from '../components/EmptyState';
+import { ChevronDown, ChevronUp, Edit2, Trash2 } from 'lucide-react';
 
 const FilterPills = ({ filter, setFilter }) => {
   const pills = [
@@ -34,39 +36,110 @@ const FilterPills = ({ filter, setFilter }) => {
   );
 };
 
-const TransactionRow = ({ transaction: t }) => (
-  <tr className="hover:bg-(--surface-hover) transition-colors group">
-    <td className="px-5 py-4 whitespace-nowrap font-medium text-foreground text-sm">
-      {new Date(t.date).toLocaleDateString(undefined, {
-        month: 'short', day: 'numeric', year: 'numeric',
-      })}
-    </td>
-    <td className="px-5 py-4">
-      <div className="flex items-center gap-3">
-        <Badge variant={t.type}>{t.type}</Badge>
-        <span className="font-semibold text-foreground text-sm">{t.category}</span>
+const TransactionRow = ({ transaction: t, deleteTransaction }) => {
+  const [expanded, setExpanded] = useState(false);
+  const { confirm } = useConfirm();
+
+  const handleDelete = async (e) => {
+    e.stopPropagation();
+    const isConfirmed = await confirm({
+      title: 'Delete Transaction',
+      message: 'Are you sure you want to delete this transaction? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      isDestructive: true,
+    });
+    
+    if (isConfirmed) {
+      deleteTransaction(t.id);
+    }
+  };
+
+  return (
+    <div className="group border-b border-border/30 last:border-0 hover:bg-(--surface-hover) transition-colors flex flex-col">
+      <div 
+        className="flex items-center justify-between p-4 cursor-pointer sm:cursor-default sm:grid sm:grid-cols-[120px_1.5fr_2fr_100px_80px] sm:gap-4"
+        onClick={() => {
+          if (window.innerWidth < 640) setExpanded(!expanded);
+        }}
+      >
+        {/* 1. Date (Desktop) */}
+        <div className="hidden sm:block text-sm font-medium text-foreground">
+          {new Date(t.date).toLocaleDateString(undefined, {
+            month: 'short', day: 'numeric', year: 'numeric',
+          })}
+        </div>
+
+        {/* 2. Type/Category + Date (Mobile) */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+          <div className="flex items-center gap-2">
+            <Badge variant={t.type}>{t.type}</Badge>
+            <span className="font-semibold text-foreground text-sm">{t.category}</span>
+          </div>
+          <span className="sm:hidden text-xs text-muted-foreground">
+            {new Date(t.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+          </span>
+        </div>
+
+        {/* 3. Details (Desktop) */}
+        <div className="hidden sm:block text-sm text-muted-foreground truncate">
+          {t.type === 'income'
+            ? (t.clientName ? `Client: ${t.clientName}` : 'No client info')
+            : (t.description || t.vendor || '—')}
+        </div>
+
+        {/* 4. Amount */}
+        <div className={`text-right font-bold text-sm ${
+          t.type === 'income' ? 'text-success' : 'text-foreground'
+        }`}>
+          {t.type === 'income' ? '+' : '-'}₵{t.amount.toFixed(2)}
+        </div>
+
+        {/* 5. Actions (Desktop) / Expand Icon (Mobile) */}
+        <div className="hidden sm:flex justify-end items-center gap-1">
+          {/* <button className="text-primary hover:text-primary/80 transition-colors p-2 rounded-lg hover:bg-primary/10" title="Edit">
+             <Edit2 size={16} />
+          </button> */}
+          <button 
+             onClick={handleDelete}
+             className="text-destructive hover:text-destructive/80 transition-colors p-2 rounded-lg hover:bg-destructive/10" title="Delete">
+             <Trash2 size={16} />
+          </button>
+        </div>
+        <div className="sm:hidden flex justify-end text-muted-foreground">
+           {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </div>
       </div>
-    </td>
-    <td className="px-5 py-4 text-muted-foreground text-sm hidden md:table-cell">
-      {t.type === 'income'
-        ? (t.clientName ? `Client: ${t.clientName}` : 'No client')
-        : (t.description || t.vendor || '—')}
-    </td>
-    <td className={`px-5 py-4 text-right font-bold whitespace-nowrap text-sm ${
-      t.type === 'income' ? 'text-success' : 'text-foreground'
-    }`}>
-      {t.type === 'income' ? '+' : '-'}₵{t.amount.toFixed(2)}
-    </td>
-    <td className="px-5 py-4 text-center">
-      <button className="text-muted-foreground hover:text-primary transition-colors text-xs font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 focus:opacity-100">
-        Edit
-      </button>
-    </td>
-  </tr>
-);
+
+      {/* Expanded Content (Mobile Only) */}
+      {expanded && (
+        <div className="sm:hidden px-4 pb-4 pt-1 animate-fade-in-up">
+          <div className="mb-4 text-sm text-muted-foreground bg-(--surface-subtle) p-3 rounded-lg">
+            <span className="font-semibold text-foreground block mb-1">Details:</span>
+            {t.type === 'income'
+              ? (t.clientName ? `Client: ${t.clientName}` : 'No client info')
+              : (t.description || t.vendor || '—')}
+          </div>
+          <div className="flex items-center justify-between">
+            {/* <button className="text-primary hover:text-primary/80 transition-colors text-xs font-bold uppercase tracking-wider bg-primary/10 px-4 py-2 rounded-lg flex items-center gap-2">
+              <Edit2 size={14} /> Edit
+            </button> */}
+            <div className="flex-1"></div>
+            <button 
+              onClick={handleDelete}
+              className="text-destructive hover:text-destructive/80 transition-colors text-xs font-bold uppercase tracking-wider bg-destructive/10 px-4 py-2 rounded-lg flex items-center gap-2"
+            >
+              <Trash2 size={14} /> Delete
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const Transactions = () => {
-  const { transactions } = useData();
+  const { transactions, deleteTransaction } = useData();
   const [filter, setFilter] = useState('all');
 
   const filteredTransactions = transactions.filter(t => {
@@ -83,47 +156,42 @@ export const Transactions = () => {
       />
 
       <GlassCard className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead>
-              <tr className="border-b border-border/40">
-                <th className="px-5 py-4 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Date</th>
-                <th className="px-5 py-4 font-semibold text-xs uppercase tracking-wider text-muted-foreground">Type / Category</th>
-                <th className="px-5 py-4 font-semibold text-xs uppercase tracking-wider text-muted-foreground hidden md:table-cell">Details</th>
-                <th className="px-5 py-4 font-semibold text-xs uppercase tracking-wider text-muted-foreground text-right">Amount</th>
-                <th className="px-5 py-4 font-semibold text-xs uppercase tracking-wider text-muted-foreground text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/30">
-              {filteredTransactions.map(t => (
-                <TransactionRow key={t.id} transaction={t} />
-              ))}
+        {/* Header Row (Desktop only) */}
+        <div className="hidden sm:grid sm:grid-cols-[120px_1.5fr_2fr_100px_80px] sm:gap-4 px-4 py-3 bg-(--surface-subtle) border-b border-border/40 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <div>Date</div>
+          <div>Type / Category</div>
+          <div>Details</div>
+          <div className="text-right">Amount</div>
+          <div className="text-right">Actions</div>
+        </div>
+        
+        {/* List Body */}
+        <div className="flex flex-col">
+          {filteredTransactions.map(t => (
+            <TransactionRow key={t.id} transaction={t} deleteTransaction={deleteTransaction} />
+          ))}
 
-              {filteredTransactions.length === 0 && (
-                <tr>
-                  <td colSpan="5">
-                    <EmptyState
-                      icon="📝"
-                      title="No transactions found"
-                      message={
-                        filter === 'all'
-                          ? "You haven't recorded any transactions yet. Record your first service to begin tracking your business."
-                          : `You don't have any ${filter} transactions.`
-                      }
-                      action={
-                        filter === 'all' && (
-                          <>
-                            <Link to="/income/new"><Button size="sm">Add Income</Button></Link>
-                            <Link to="/expense/new"><Button variant="secondary" size="sm">Add Expense</Button></Link>
-                          </>
-                        )
-                      }
-                    />
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          {filteredTransactions.length === 0 && (
+            <div className="p-8">
+              <EmptyState
+                icon="📝"
+                title="No transactions found"
+                message={
+                  filter === 'all'
+                    ? "You haven't recorded any transactions yet. Record your first service to begin tracking your business."
+                    : `You don't have any ${filter} transactions.`
+                }
+                action={
+                  filter === 'all' && (
+                    <div className="flex gap-3 mt-2">
+                      <Link to="/income/new"><Button size="sm">Add Income</Button></Link>
+                      <Link to="/expense/new"><Button variant="secondary" size="sm">Add Expense</Button></Link>
+                    </div>
+                  )
+                }
+              />
+            </div>
+          )}
         </div>
       </GlassCard>
     </div>

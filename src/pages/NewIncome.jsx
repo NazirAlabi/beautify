@@ -230,6 +230,53 @@ export const NewIncome = () => {
                 ]}
               />
 
+              {/* Dynamic Service Creation Fields */}
+              {isCreatingNewService && (
+                <GlassCard className="p-4 border-dashed border-primary/40 bg-primary-light/5 space-y-3 animate-scale-in">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-primary font-bold text-sm">
+                      <Sparkles size={16} />
+                      <span>Create Custom Service</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, serviceDropdown: '' }))}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3">
+                    <FormField
+                      label="Service Name"
+                      type="text"
+                      value={formData.newServiceName}
+                      onChange={(e) => setFormData({ ...formData, newServiceName: e.target.value })}
+                      placeholder="e.g. Volume Lash Set"
+                    />
+                    <FormField
+                      label="Default Price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      prefix="₵"
+                      value={formData.newServicePrice}
+                      onChange={(e) => setFormData({ ...formData, newServicePrice: e.target.value })}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="flex justify-end pt-1">
+                    <Button
+                      onClick={handleAddCustomService}
+                      size="sm"
+                      disabled={!formData.newServiceName.trim() || !formData.newServicePrice}
+                    >
+                      + Add to Transaction
+                    </Button>
+                  </div>
+                </GlassCard>
+              )}
+
               {/* Display Selected Services List */}
               {selectedServices.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-1.5 animate-slide-up">
@@ -277,53 +324,6 @@ export const NewIncome = () => {
               ]}
             />
           </div>
-
-          {/* Dynamic Service Creation Fields */}
-          {isCreatingNewService && (
-            <GlassCard className="p-5 border-dashed border-primary/40 bg-primary-light/5 space-y-4 animate-scale-in">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-primary font-bold text-sm">
-                  <Sparkles size={16} />
-                  <span>Create Custom Service</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, serviceDropdown: '' }))}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  label="Service Name"
-                  type="text"
-                  value={formData.newServiceName}
-                  onChange={(e) => setFormData({ ...formData, newServiceName: e.target.value })}
-                  placeholder="e.g. Volume Lash Set"
-                />
-                <FormField
-                  label="Default Price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  prefix="₵"
-                  value={formData.newServicePrice}
-                  onChange={(e) => setFormData({ ...formData, newServicePrice: e.target.value })}
-                  placeholder="0.00"
-                />
-              </div>
-              <div className="flex justify-end pt-1">
-                <Button
-                  onClick={handleAddCustomService}
-                  size="sm"
-                  disabled={!formData.newServiceName.trim() || !formData.newServicePrice}
-                >
-                  + Add to Transaction
-                </Button>
-              </div>
-            </GlassCard>
-          )}
 
           {/* Dynamic Client Creation Fields */}
           {isCreatingNewClient && (

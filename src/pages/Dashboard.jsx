@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { isSameDay, isSameWeek, isSameMonth, parseISO, subWeeks, startOfWeek, endOfWeek, isWithinInterval } from 'date-fns';
+import { isSameDay, isSameWeek, isSameMonth, parseISO, subWeeks, startOfWeek, endOfWeek, isWithinInterval, format } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { DollarSign, TrendingUp, Calendar, Sparkles, ArrowRight } from 'lucide-react';
 
@@ -12,32 +12,33 @@ import { GlassCard } from '../components/GlassCard';
 import { EmptyState } from '../components/EmptyState';
 
 export const Dashboard = () => {
-  const { transactions } = useData();
+  const { transactions, homePageMetrics, isFetchingTransactions } = useData();
 
   const today = new Date();
   const hour = today.getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
+  // --- Live Calculations ---
   const incomeTransactions = transactions.filter(t => t.type === 'income');
   const expenseTransactions = transactions.filter(t => t.type === 'expense');
 
-  const todaysEarnings = incomeTransactions
+  const liveTodaysEarnings = incomeTransactions
     .filter(t => isSameDay(parseISO(t.date), today))
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const thisWeeksEarnings = incomeTransactions
+  const liveThisWeeksEarnings = incomeTransactions
     .filter(t => isSameWeek(parseISO(t.date), today))
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const thisMonthsEarnings = incomeTransactions
+  const liveThisMonthsEarnings = incomeTransactions
     .filter(t => isSameMonth(parseISO(t.date), today))
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const thisMonthsExpenses = expenseTransactions
+  const liveThisMonthsExpenses = expenseTransactions
     .filter(t => isSameMonth(parseISO(t.date), today))
     .reduce((sum, t) => sum + t.amount, 0);
 
-  const profit = thisMonthsEarnings - thisMonthsExpenses;
+  const liveProfit = liveThisMonthsEarnings - liveThisMonthsExpenses;
 
   // Calculate dynamic 3-week intervals
   const weeksIntervals = [
@@ -58,7 +59,7 @@ export const Dashboard = () => {
     },
   ];
 
-  const chartData = weeksIntervals.map(w => {
+  const liveChartData = weeksIntervals.map(w => {
     const amount = incomeTransactions
       .filter(t => {
         try {
@@ -73,12 +74,52 @@ export const Dashboard = () => {
     return { name: w.name, amount };
   });
 
+  const liveRecentTransactions = transactions.slice(0, 5);
+
+  // --- Decide what to display ---
+  const useCached = isFetchingTransactions && homePageMetrics;
+
+  const todaysEarnings = useCached ? homePageMetrics.todaysEarnings : liveTodaysEarnings;
+  const thisWeeksEarnings = useCached ? homePageMetrics.thisWeeksEarnings : liveThisWeeksEarnings;
+  const thisMonthsEarnings = useCached ? homePageMetrics.thisMonthsEarnings : liveThisMonthsEarnings;
+  const profit = useCached ? homePageMetrics.profit : liveProfit;
+  const chartData = useCached ? homePageMetrics.chartData : liveChartData;
+  const displayTransactions = useCached ? (homePageMetrics.recentTransactions || []) : liveRecentTransactions;
+
+  // --- Background save of live metrics ---
+  useEffect(() => {
+    if (!isFetchingTransactions && transactions.length > 0) {
+      const newMetrics = {
+        todaysEarnings: liveTodaysEarnings,
+        thisWeeksEarnings: liveThisWeeksEarnings,
+        thisMonthsEarnings: liveThisMonthsEarnings,
+        profit: liveProfit,
+        chartData: liveChartData,
+        recentTransactions: liveRecentTransactions,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      // Simple JSON compare to avoid unnecessary writes
+      // Normally we'd do a deep compare, but we'll import api directly to save it
+      import('../lib/api').then(({ api }) => {
+        api.saveHomePageMetrics(newMetrics);
+      });
+    }
+  }, [transactions, isFetchingTransactions]);
+
   return (
     <div className="space-y-8">
-      <PageHeader
-        title={`${greeting} ✨`}
-        subtitle="Here's what's happening with your business today."
-      />
+      <div className="flex justify-between items-end">
+        <PageHeader
+          title={`${greeting} ✨`}
+          subtitle="Here's what's happening with your business today."
+        />
+        {useCached && homePageMetrics.lastUpdated && (
+          <p className="text-xs text-muted-foreground/60 mb-8 whitespace-nowrap animate-pulse">
+            As at {format(parseISO(homePageMetrics.lastUpdated), "eee, MMM d, yy h:mm a")}
+          </p>
+        )}
+      </div>
 
       {/* Stat Cards */}
       <div className="grid gap-4 sm:gap-5 grid-cols-2 lg:grid-cols-4">
@@ -186,7 +227,7 @@ export const Dashboard = () => {
             )}
           </div>
           <div className="space-y-2">
-            {transactions.slice(0, 5).map(t => (
+            {displayTransactions.map(t => (
               <div
                 key={t.id}
                 className="flex justify-between items-center p-3 rounded-xl hover:bg-(--surface-hover) transition-all duration-200"
@@ -205,7 +246,7 @@ export const Dashboard = () => {
                 </span>
               </div>
             ))}
-            {transactions.length === 0 && (
+            {displayTransactions.length === 0 && (
               <EmptyState
                 icon="📝"
                 title="No transactions yet"

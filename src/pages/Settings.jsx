@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { useToast } from '../context/ToastContext';
 import { useConfirm } from '../context/ConfirmContext';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Trash2, Edit3, Save, X, Sparkles, Receipt, Shield } from 'lucide-react';
+import { Plus, Trash2, Edit3, Save, X, Sparkles, Receipt, Shield, ChevronDown, ChevronUp, Settings2 } from 'lucide-react';
 
 import { PageHeader } from '../components/PageHeader';
 import { GlassCard } from '../components/GlassCard';
@@ -35,6 +36,22 @@ export const Settings = () => {
 
   // Category Form State
   const [newCategoryName, setNewCategoryName] = useState('');
+
+  // Advanced Settings State
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [devMode, setDevMode] = useState(() => localStorage.getItem('beauty_tracker_dev_mode') === 'true');
+
+  const toggleDevMode = (e) => {
+    const newVal = e.target.checked;
+    setDevMode(newVal);
+    if (newVal) {
+      localStorage.setItem('beauty_tracker_dev_mode', 'true');
+      toast.success("Developer Mode enabled");
+    } else {
+      localStorage.removeItem('beauty_tracker_dev_mode');
+      toast.success("Developer Mode disabled");
+    }
+  };
 
   // Handlers for Services
   const handleAddService = (e) => {
@@ -134,29 +151,33 @@ export const Settings = () => {
                   className="flex items-center justify-between p-3 rounded-xl bg-secondary/15 border border-border/20 transition-all duration-300"
                 >
                   {editingServiceId === service.id ? (
-                    <div className="flex-1 flex flex-col sm:flex-row gap-2">
+                    <div className="flex-1 flex flex-col gap-2">
                       <input
                         type="text"
                         value={editServiceName}
                         onChange={(e) => setEditServiceName(e.target.value)}
-                        className="glass-input h-9 text-xs py-1 px-3 flex-1"
+                        className="glass-input text-xs py-3 px-3 flex-1 sm:w-4/5"
                         placeholder="Service Name"
                       />
-                      <div className="flex gap-2 items-center">
+                      <div className="flex gap-2 justify-between">
+                        <div>
                         <span className="text-xs text-muted-foreground">₵</span>
                         <input
                           type="number"
                           value={editServicePrice}
                           onChange={(e) => setEditServicePrice(e.target.value)}
-                          className="glass-input h-9 text-xs py-1 px-3 w-20"
+                          className="glass-input h-9 text-xs py-1 px-3 w-20 mx-2"
                           placeholder="Price"
                         />
+                        </div>
+                        <div className="flex items-center">
                         <button
                           onClick={() => handleSaveEdit(service.id)}
-                          className="p-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
+                          className="p-2 flex  rounded-lg bg-primary text-white text-nowrap flex-nowrap hover:bg-primary/90 transition-colors mr-3"
                           title="Save changes"
                         >
-                          <Save size={14} />
+                          <Save size={14} className='place-self-center mr-1'/>
+                          <span className="text-sm">Save</span>
                         </button>
                         <button
                           onClick={() => setEditingServiceId(null)}
@@ -165,6 +186,7 @@ export const Settings = () => {
                         >
                           <X size={14} />
                         </button>
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -176,14 +198,14 @@ export const Settings = () => {
                       <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => handleStartEdit(service)}
-                          className="p-2 rounded-lg hover:bg-secondary/40 text-muted-foreground hover:text-primary transition-all duration-200"
+                          className="glass-panel p-2 rounded-lg hover:bg-secondary/40 text-muted-foreground hover:text-primary transition-all duration-200"
                           title="Edit Service"
                         >
                           <Edit3 size={14} />
                         </button>
                         <button
                           onClick={() => handleDeleteService(service.id, service.name)}
-                          className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all duration-200"
+                          className="glass-panel bg-rose-400 p-2 rounded-lg hover:bg-destructive/10 text-white hover:text-destructive transition-all duration-200"
                           title="Delete Service"
                         >
                           <Trash2 size={14} />
@@ -281,30 +303,72 @@ export const Settings = () => {
 
       {/* Advanced Settings */}
       <div className="grid gap-6 mt-6">
-        <GlassCard className="p-6" variant="heavy">
-          <div className="flex items-center gap-2 text-info font-bold mb-6">
-            <Shield size={20} />
-            <h3 className="text-lg text-foreground font-display">Security Settings</h3>
+        <GlassCard className="overflow-hidden" variant="heavy">
+          <div 
+            className="flex items-center justify-between p-6 cursor-pointer hover:bg-secondary/10 transition-colors"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+          >
+            <div className="flex items-center gap-2 text-info font-bold">
+              <Settings2 size={20} />
+              <h3 className="text-lg text-foreground font-display">Advanced Settings</h3>
+            </div>
+            <div className="text-muted-foreground">
+              {showAdvanced ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            </div>
           </div>
 
-          <div className="flex items-center justify-between py-2">
-            <div>
-              <p className="font-semibold">Login every time</p>
-              <p className="text-sm text-muted-foreground mt-1">If enabled, you will be required to log in every 4 hours instead of every 2 days.</p>
+          {showAdvanced && (
+            <div className="p-6 pt-0 border-t border-border/20 space-y-6 animate-fade-in-up">
+              
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="font-semibold text-foreground">Login every time</p>
+                  <p className="text-sm text-muted-foreground mt-1">If enabled, you will be required to log in every 4 hours instead of every 2 days.</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer"
+                    checked={authConfig?.requireLoginEveryTime || false}
+                    onChange={(e) => {
+                      updateConfig({ requireLoginEveryTime: e.target.checked });
+                      toast.success("Security preferences updated");
+                    }}
+                  />
+                  <div className="w-11 h-6 bg-secondary/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border/30 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <p className="font-semibold text-foreground">Developer Mode</p>
+                  <p className="text-sm text-muted-foreground mt-1">Enable debugging features and local mock data.</p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer"
+                    checked={devMode}
+                    onChange={toggleDevMode}
+                  />
+                  <div className="w-11 h-6 bg-secondary/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border/30 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent-lavender"></div>
+                </label>
+              </div>
+
+              {devMode && (
+                <div className="pt-4 border-t border-border/20 flex flex-col sm:flex-row justify-between items-start sm:items-center py-2 animate-fade-in-up">
+                  <div>
+                    <p className="font-semibold text-foreground">CSV Import Utility</p>
+                    <p className="text-sm text-muted-foreground mt-1">Import bulk transactions from data.csv</p>
+                  </div>
+                  <Link to="/import" className="mt-3 sm:mt-0">
+                    <Button type="button" size="sm" variant="secondary">Open Utility</Button>
+                  </Link>
+                </div>
+              )}
+
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input 
-                type="checkbox" 
-                className="sr-only peer"
-                checked={authConfig?.requireLoginEveryTime || false}
-                onChange={(e) => {
-                  updateConfig({ requireLoginEveryTime: e.target.checked });
-                  toast.success("Security preferences updated");
-                }}
-              />
-              <div className="w-11 h-6 bg-secondary/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border/30 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-            </label>
-          </div>
+          )}
         </GlassCard>
       </div>
     </div>

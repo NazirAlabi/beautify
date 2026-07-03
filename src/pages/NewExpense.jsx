@@ -107,7 +107,7 @@ export const NewExpense = () => {
             />
           </div>
 
-          <FormField label="Description" required>
+          <FormField label="Description (Optional)">
             <textarea
               rows={1}
               value={formData.description}
@@ -118,7 +118,6 @@ export const NewExpense = () => {
               }}
               className="glass-input py-3 resize-none overflow-y-auto max-h-[120px] min-h-[48px]"
               placeholder="What was this expense for?"
-              required
             />
           </FormField>
 

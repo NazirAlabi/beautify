@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { Sidebar } from './components/Sidebar';
 import { BottomNav } from './components/BottomNav';
 import { MobileHeader } from './components/MobileHeader';
+import { LogOut } from 'lucide-react';
 
 // Lazy load page components
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
@@ -14,21 +15,11 @@ const Clients = lazy(() => import('./pages/Clients').then(m => ({ default: m.Cli
 const Reports = lazy(() => import('./pages/Reports').then(m => ({ default: m.Reports })));
 const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
 const Landing = lazy(() => import('./pages/Landing').then(m => ({ default: m.Landing })));
+const ImportUtility = lazy(() => import('./pages/ImportUtility').then(m => ({ default: m.ImportUtility })));
 
-// A simple premium-looking skeleton loader for page transitions
-const PageLoader = () => (
-  <div className="w-full space-y-6 py-6 animate-pulse">
-    <div className="h-10 bg-(--surface-hover) rounded-xl w-1/3" />
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {[...Array(4)].map((_, i) => (
-        <div key={i} className="h-28 bg-(--surface-hover) rounded-2xl" />
-      ))}
-    </div>
-    <div className="h-64 bg-(--surface-hover) rounded-2xl" />
-  </div>
-);
+import { PageLoader } from './components/PageLoader';
 
-import { useData } from './context/DataContext';
+import { useData, DataProvider } from './context/DataContext';
 import { ToastProvider } from './context/ToastContext';
 import { ConfirmProvider } from './context/ConfirmContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -46,6 +37,8 @@ const ProtectedRoute = ({ children }) => {
 const Layout = ({ children }) => {
   const location = useLocation();
   const { loading } = useData();
+  const { logout } = useAuth();
+  const currentYear = new Date().getFullYear();
 
   return (
     <div className="min-h-screen text-foreground pb-24 md:pb-0 md:flex relative overflow-hidden">
@@ -68,11 +61,11 @@ const Layout = ({ children }) => {
       <Sidebar />
 
       {/* Main Content Area */}
-      <main className="flex-1 md:ml-64 p-4 sm:p-6 md:p-8 lg:p-10 max-w-[1400px] mx-auto w-full z-10 relative min-h-screen">
+      <main className="flex-1 md:ml-64 p-4 sm:p-6 md:p-8 lg:p-10 max-w-[1400px] mx-auto w-full z-10 relative min-h-screen flex flex-col">
         <MobileHeader />
 
         {/* Page content with fade-in animation */}
-        <div key={location.pathname} className="animate-fade-in-up">
+        <div key={location.pathname} className="animate-fade-in-up flex-1">
           {loading ? (
             <PageLoader />
           ) : (
@@ -81,6 +74,18 @@ const Layout = ({ children }) => {
             </Suspense>
           )}
         </div>
+
+        {/* Footer Section */}
+        <footer className="mt-24 pt-6 flex flex-row items-center justify-between gap-4 text-sm text-text-secondary/70 border-t border-(--surface-hover)/50">
+          <p className="flex flex-col sm:flex-row items-center gap-0.5"><span className="text-nowrap">&copy; {currentYear} Beautify</span><span className="text-nowrap"> All rights reserved.</span></p>
+          <button
+            onClick={logout}
+            className="glass-panel flex items-center text-nowrap gap-2 px-4 py-2 rounded-xl hover:bg-(--surface-hover) hover:text-red-400 transition-colors"
+          >
+            <LogOut size={16} />
+            <span>Sign Out</span>
+          </button>
+        </footer>
       </main>
 
       <BottomNav />
@@ -94,31 +99,34 @@ function App() {
       <AuthProvider>
         <ToastProvider>
           <ConfirmProvider>
-            <Routes>
-              {/* Public Landing Route */}
-              <Route path="/" element={
-                <Suspense fallback={<PageLoader />}>
-                  <Landing />
-                </Suspense>
-              } />
-              
-              {/* Authenticated App Routes within Layout */}
-              <Route path="/*" element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Routes>
-                      <Route path="/home" element={<Dashboard />} />
-                      <Route path="/income/new" element={<NewIncome />} />
-                      <Route path="/expense/new" element={<NewExpense />} />
-                      <Route path="/transactions" element={<Transactions />} />
-                      <Route path="/clients" element={<Clients />} />
-                      <Route path="/reports" element={<Reports />} />
-                      <Route path="/settings" element={<Settings />} />
-                    </Routes>
-                  </Layout>
-                </ProtectedRoute>
-              } />
-            </Routes>
+            <DataProvider>
+              <Routes>
+                {/* Public Landing Route */}
+                <Route path="/" element={
+                  <Suspense fallback={<PageLoader />}>
+                    <Landing />
+                  </Suspense>
+                } />
+                
+                {/* Authenticated App Routes within Layout */}
+                <Route path="/*" element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Routes>
+                        <Route path="/home" element={<Dashboard />} />
+                        <Route path="/income/new" element={<NewIncome />} />
+                        <Route path="/expense/new" element={<NewExpense />} />
+                        <Route path="/transactions" element={<Transactions />} />
+                        <Route path="/clients" element={<Clients />} />
+                        <Route path="/reports" element={<Reports />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/import" element={<ImportUtility />} />
+                      </Routes>
+                    </Layout>
+                  </ProtectedRoute>
+                } />
+              </Routes>
+            </DataProvider>
           </ConfirmProvider>
         </ToastProvider>
       </AuthProvider>
