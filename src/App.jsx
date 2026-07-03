@@ -31,6 +31,17 @@ const PageLoader = () => (
 import { useData } from './context/DataContext';
 import { ToastProvider } from './context/ToastContext';
 import { ConfirmProvider } from './context/ConfirmContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { Navigate } from 'react-router-dom';
+
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) return <PageLoader />;
+  if (!isAuthenticated) return <Navigate to="/" replace />;
+  
+  return children;
+};
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -80,33 +91,37 @@ const Layout = ({ children }) => {
 function App() {
   return (
     <Router>
-      <ToastProvider>
-        <ConfirmProvider>
-          <Routes>
-            {/* Public Landing Route */}
-            <Route path="/" element={
-              <Suspense fallback={<PageLoader />}>
-                <Landing />
-              </Suspense>
-            } />
-            
-            {/* Authenticated App Routes within Layout */}
-            <Route path="/*" element={
-              <Layout>
-                <Routes>
-                  <Route path="/home" element={<Dashboard />} />
-                  <Route path="/income/new" element={<NewIncome />} />
-                  <Route path="/expense/new" element={<NewExpense />} />
-                  <Route path="/transactions" element={<Transactions />} />
-                  <Route path="/clients" element={<Clients />} />
-                  <Route path="/reports" element={<Reports />} />
-                  <Route path="/settings" element={<Settings />} />
-                </Routes>
-              </Layout>
-            } />
-          </Routes>
-        </ConfirmProvider>
-      </ToastProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <ConfirmProvider>
+            <Routes>
+              {/* Public Landing Route */}
+              <Route path="/" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Landing />
+                </Suspense>
+              } />
+              
+              {/* Authenticated App Routes within Layout */}
+              <Route path="/*" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Routes>
+                      <Route path="/home" element={<Dashboard />} />
+                      <Route path="/income/new" element={<NewIncome />} />
+                      <Route path="/expense/new" element={<NewExpense />} />
+                      <Route path="/transactions" element={<Transactions />} />
+                      <Route path="/clients" element={<Clients />} />
+                      <Route path="/reports" element={<Reports />} />
+                      <Route path="/settings" element={<Settings />} />
+                    </Routes>
+                  </Layout>
+                </ProtectedRoute>
+              } />
+            </Routes>
+          </ConfirmProvider>
+        </ToastProvider>
+      </AuthProvider>
     </Router>
   );
 }

@@ -164,5 +164,45 @@ export const api = {
     }
     const ref = doc(db, 'metadata', 'expenseCategories');
     await setDoc(ref, { categories });
+  },
+
+  // ─── Auth ────────────────────────────────────────────────────────────
+  async getAuthConfig() {
+    if (isMockFirebase) {
+      return getLocal('authConfig', { 
+        displayName: 'Ramat', 
+        requireLoginEveryTime: false,
+        passwordHash: '' 
+      });
+    }
+    try {
+      const ref = doc(db, 'settings', 'auth');
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        return snap.data();
+      }
+      return { 
+        displayName: 'Ramat', 
+        requireLoginEveryTime: false,
+        passwordHash: ''
+      };
+    } catch (e) {
+      console.warn("Firestore error, falling back to local storage:", e);
+      return getLocal('authConfig', { 
+        displayName: 'Ramat', 
+        requireLoginEveryTime: false,
+        passwordHash: ''
+      });
+    }
+  },
+
+  async updateAuthConfig(config) {
+    if (isMockFirebase) {
+      const current = getLocal('authConfig', {});
+      setLocal('authConfig', { ...current, ...config });
+      return;
+    }
+    const ref = doc(db, 'settings', 'auth');
+    await setDoc(ref, config, { merge: true });
   }
 };

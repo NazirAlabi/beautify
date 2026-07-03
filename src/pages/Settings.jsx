@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useToast } from '../context/ToastContext';
 import { useConfirm } from '../context/ConfirmContext';
-import { Plus, Trash2, Edit3, Save, X, Sparkles, Receipt } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Plus, Trash2, Edit3, Save, X, Sparkles, Receipt, Shield } from 'lucide-react';
 
 import { PageHeader } from '../components/PageHeader';
 import { GlassCard } from '../components/GlassCard';
@@ -20,6 +21,7 @@ export const Settings = () => {
     removeExpenseCategory,
   } = useData();
 
+  const { authConfig, updateConfig } = useAuth();
   const toast = useToast();
   const { confirm } = useConfirm();
 
@@ -274,6 +276,35 @@ export const Settings = () => {
               </button>
             </div>
           </form>
+        </GlassCard>
+      </div>
+
+      {/* Advanced Settings */}
+      <div className="grid gap-6 mt-6">
+        <GlassCard className="p-6" variant="heavy">
+          <div className="flex items-center gap-2 text-info font-bold mb-6">
+            <Shield size={20} />
+            <h3 className="text-lg text-foreground font-display">Security Settings</h3>
+          </div>
+
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="font-semibold">Login every time</p>
+              <p className="text-sm text-muted-foreground mt-1">If enabled, you will be required to log in every 4 hours instead of every 2 days.</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                className="sr-only peer"
+                checked={authConfig?.requireLoginEveryTime || false}
+                onChange={(e) => {
+                  updateConfig({ requireLoginEveryTime: e.target.checked });
+                  toast.success("Security preferences updated");
+                }}
+              />
+              <div className="w-11 h-6 bg-secondary/30 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border/30 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
         </GlassCard>
       </div>
     </div>
