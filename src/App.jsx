@@ -12,6 +12,7 @@ const NewExpense = lazy(() => import('./pages/NewExpense').then(m => ({ default:
 const Transactions = lazy(() => import('./pages/Transactions').then(m => ({ default: m.Transactions })));
 const Clients = lazy(() => import('./pages/Clients').then(m => ({ default: m.Clients })));
 const Reports = lazy(() => import('./pages/Reports').then(m => ({ default: m.Reports })));
+const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
 
 // A simple premium-looking skeleton loader for page transitions
 const PageLoader = () => (
@@ -84,6 +85,7 @@ function App() {
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/clients" element={<Clients />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </Layout>
     </Router>

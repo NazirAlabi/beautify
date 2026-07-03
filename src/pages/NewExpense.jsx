@@ -104,14 +104,20 @@ export const NewExpense = () => {
             />
           </div>
 
-          <FormField
-            label="Description"
-            required
-            type="text"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="What was this expense for?"
-          />
+          <FormField label="Description" required>
+            <textarea
+              rows={1}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onInput={(e) => {
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+              }}
+              className="glass-input py-3 resize-none overflow-y-auto max-h-[120px] min-h-[48px]"
+              placeholder="What was this expense for?"
+              required
+            />
+          </FormField>
 
           <div className="pt-4">
             <Button

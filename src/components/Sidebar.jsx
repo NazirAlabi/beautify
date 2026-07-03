@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, PlusCircle, MinusCircle, Users, List, BarChart3, Sparkles, Moon, Sun } from 'lucide-react';
+import { Home, PlusCircle, MinusCircle, Users, List, BarChart3, Sparkles, Moon, Sun, Settings as SettingsIcon } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
   { path: '/transactions', icon: List, label: 'History' },
   { path: '/clients', icon: Users, label: 'Clients' },
   { path: '/reports', icon: BarChart3, label: 'Reports' },
+  { path: '/settings', icon: SettingsIcon, label: 'Settings' },
 ];
 
 export { navItems };

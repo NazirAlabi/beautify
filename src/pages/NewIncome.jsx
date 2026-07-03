@@ -434,10 +434,14 @@ export const NewIncome = () => {
 
           <FormField label="Notes (Optional)">
             <textarea
-              rows="3"
+              rows={1}
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="glass-input py-3"
+              onInput={(e) => {
+                e.target.style.height = 'auto';
+                e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+              }}
+              className="glass-input py-3 resize-none overflow-y-auto max-h-[120px] min-h-[48px]"
               placeholder="Any details about the appointment..."
             />
           </FormField>

@@ -5,21 +5,6 @@ const DataContext = createContext();
 
 export const useData = () => useContext(DataContext);
 
-const initialServicesSeed = [
-  { name: 'Soft Glam', defaultPrice: 150 },
-  { name: 'Bridal', defaultPrice: 200 },
-  { name: 'Natural Makeup', defaultPrice: 100 },
-];
-
-const initialCategoriesSeed = [
-  'Makeup products',
-  'Transportation',
-  'Food',
-  'Equipment',
-  'Utilities',
-  'Miscellaneous',
-];
-
 export const DataProvider = ({ children }) => {
   const [transactions, setTransactions] = useState([]);
   const [clients, setClients] = useState([]);
@@ -57,22 +42,8 @@ export const DataProvider = ({ children }) => {
         });
         setClients(normalizedClients);
 
-        // Auto-seed empty list states for a smoother first-run experience
-        if (srvs.length === 0) {
-          const seeded = await Promise.all(
-            initialServicesSeed.map(s => api.addService(s))
-          );
-          setServices(seeded);
-        } else {
-          setServices(srvs);
-        }
-
-        if (cats.length === 0) {
-          await api.saveExpenseCategories(initialCategoriesSeed);
-          setExpenseCategories(initialCategoriesSeed);
-        } else {
-          setExpenseCategories(cats);
-        }
+        setServices(srvs);
+        setExpenseCategories(cats);
       } catch (err) {
         console.error("Error loading application state:", err);
       } finally {
